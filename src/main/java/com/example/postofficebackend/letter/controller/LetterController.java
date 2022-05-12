@@ -38,6 +38,13 @@ public class LetterController {
                 .getAllSorted());
     }
 
+    @GetMapping("{uniqueId}")
+    public ResponseEntity<List<Letter>> getAllLettersBefore(@PathVariable String uniqueId){
+        return ResponseEntity.ok(letterServiceI
+                .getAllLettersBefore(uniqueId));
+
+    }
+
     @PostMapping
     public ResponseEntity<Letter> add(@RequestParam("name") String name,
                                       @RequestParam("content") String content,
