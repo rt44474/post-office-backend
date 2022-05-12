@@ -1,12 +1,14 @@
 package com.example.postofficebackend.letter.controller;
 
 
+
 import com.example.postofficebackend.letter.entity.Letter;
 import com.example.postofficebackend.letter.service.LetterServiceI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +22,8 @@ public class LetterController {
     @Autowired
     private LetterServiceI letterServiceI;
 
-    @Scheduled(cron="*/20 * * * * *")
+
+    //nie potrzebne
     @GetMapping("/refresh")
     public void refresh(){
         letterServiceI.refreshQueue();

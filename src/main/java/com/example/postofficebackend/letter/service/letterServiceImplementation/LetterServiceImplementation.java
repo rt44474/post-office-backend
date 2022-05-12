@@ -5,14 +5,16 @@ import com.example.postofficebackend.letter.enumeration.Status;
 import com.example.postofficebackend.letter.repository.LetterRepositoryI;
 import com.example.postofficebackend.letter.service.LetterServiceI;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +23,6 @@ public class LetterServiceImplementation implements LetterServiceI {
 
     @Autowired
     private final LetterRepositoryI letterRepositoryI;
-
 
     @Override
     public List<Letter> getAll() {
@@ -38,28 +39,36 @@ public class LetterServiceImplementation implements LetterServiceI {
     }
 
     @Override
+    @Scheduled(fixedDelay = 20, timeUnit = TimeUnit.SECONDS)
     public void refreshQueue() {
+        //System.out.println("aktualnie: "+date.getTime());
+
         List<Letter> letterList = getAll();
 
         for (Letter letter : letterList) {
-            letter.setTime(letter.getTime() - 20);
+            letter.setTime((letter.getTime() - 20));
             if (letter.getTime() == 0) {
                 delete(letter.getId());
             } else {
                 update(letter);
             }
         }
-
     }
 
     @Override
     public Letter add(String name, String content, String pin) {
+
+        if (letterRepositoryI.checkIfNotEmpty().isEmpty()){
+            refreshQueue();
+        }
+
         if (pin.equals("8888")) {
             Letter newLetter = new Letter();
             newLetter.setName(name);
             newLetter.setContent(content);
             int lastVip = getLastVip();
             if (lastVip > 0) {
+
                 newLetter.setTime(lastVip);
             } else {
                 newLetter.setTime(getFirst() + 20);
