@@ -108,10 +108,10 @@ public class LetterServiceImplementation implements LetterServiceI {
     @Override
     public List<Letter> getAllLettersBefore(String uniqueId) {
         Letter letter = getByUniqueId(uniqueId);
-        List<Letter> letterList;
         if (letter == null){
             return null;
         }
+        List<Letter> letterList;
         if (letter.getStatus().equals("INSTANT")) {
             letterList = new ArrayList<>();
         } else {
@@ -127,6 +127,9 @@ public class LetterServiceImplementation implements LetterServiceI {
     @Override
     public List<Letter> getAllLettersBeforeName(String name) {
         Letter letter = getByName(name);
+        if (letter == null){
+            return null;
+        }
         List<Letter> letterList;
         if (letter.getStatus().equals("INSTANT")) {
             letterList = new ArrayList<>();
@@ -174,11 +177,13 @@ public class LetterServiceImplementation implements LetterServiceI {
     }
 
     public Letter getByUniqueId(String uniqueId) {
-        return letterRepositoryI.findByUniqueId(uniqueId);
+        Letter letter = letterRepositoryI.findByUniqueId(uniqueId);
+        return letter;
     }
 
     public Letter getByName(String name) {
-        return letterRepositoryI.findByName(name);
+        Letter letter = letterRepositoryI.findByName(name);
+        return letter;
     }
 
 
