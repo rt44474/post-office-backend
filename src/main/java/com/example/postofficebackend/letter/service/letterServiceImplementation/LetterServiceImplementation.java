@@ -57,8 +57,11 @@ public class LetterServiceImplementation implements LetterServiceI {
     @Override
     public Letter add(String name, String pin) {
 
-        if (letterRepositoryI.checkIfNotEmpty().isEmpty()) {
-            refreshQueue();
+        switch (checkIfNameExists(name)){
+            case 0:
+                return null;
+            case 1:
+                break;
         }
 
         if (pin.equals("8888")) {
@@ -135,6 +138,16 @@ public class LetterServiceImplementation implements LetterServiceI {
         }
         letterList.add(letter);
         return letterList;
+    }
+
+    public int checkIfNameExists(String name){
+        Letter letter = letterRepositoryI.findByName(name);
+        if (letter != null){
+            return 0;
+        }else {
+            return 1;
+        }
+
     }
 
     public int getLast() {
