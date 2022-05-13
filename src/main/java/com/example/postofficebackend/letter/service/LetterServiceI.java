@@ -8,8 +8,9 @@ public interface LetterServiceI {
     List<Letter> getAll();
     List<Letter> getAllSorted();
     List<Letter> getAllLettersBefore(String uniqueId);
-    Letter add(String name, String content, String pin);
-    void refreshQueue();
+    List<Letter> getAllLettersBeforeName(String name);
+    Letter add(String name, String pin);
+    List<Letter> getAllInstants();
 
 
 

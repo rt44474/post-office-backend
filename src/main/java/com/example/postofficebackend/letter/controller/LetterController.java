@@ -23,12 +23,6 @@ public class LetterController {
     private LetterServiceI letterServiceI;
 
 
-    //nie potrzebne
-    @GetMapping("/refresh")
-    public void refresh(){
-        letterServiceI.refreshQueue();
-    }
-
     @GetMapping
     public ResponseEntity<List<Letter>> getAll(){
         return ResponseEntity.ok(letterServiceI
@@ -41,19 +35,32 @@ public class LetterController {
                 .getAllSorted());
     }
 
-    @GetMapping("{uniqueId}")
+    @GetMapping("/uID/{uniqueId}")
     public ResponseEntity<List<Letter>> getAllLettersBefore(@PathVariable String uniqueId){
         return ResponseEntity.ok(letterServiceI
                 .getAllLettersBefore(uniqueId));
 
     }
 
+    @GetMapping("/name/{name}")
+    public ResponseEntity<List<Letter>> getAllLettersBeforeName(@PathVariable String name){
+        return ResponseEntity.ok(letterServiceI
+                .getAllLettersBeforeName(name));
+
+    }
+
+    @GetMapping("/instant")
+    public ResponseEntity<List<Letter>> getAllInstant(){
+        return ResponseEntity.ok(letterServiceI
+                .getAllInstants());
+
+    }
+
     @PostMapping
     public ResponseEntity<Letter> add(@RequestParam("name") String name,
-                                      @RequestParam("content") String content,
                                       @RequestParam("pin") String pin){
         return ResponseEntity.ok(letterServiceI
-                .add(name,content, pin));
+                .add(name, pin));
     }
 
 

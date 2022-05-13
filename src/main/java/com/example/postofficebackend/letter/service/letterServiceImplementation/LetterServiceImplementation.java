@@ -5,15 +5,15 @@ import com.example.postofficebackend.letter.enumeration.Status;
 import com.example.postofficebackend.letter.repository.LetterRepositoryI;
 import com.example.postofficebackend.letter.service.LetterServiceI;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -38,15 +38,14 @@ public class LetterServiceImplementation implements LetterServiceI {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Scheduled(fixedDelay = 20, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
     public void refreshQueue() {
         //System.out.println("aktualnie: "+date.getTime());
 
         List<Letter> letterList = getAll();
 
         for (Letter letter : letterList) {
-            letter.setTime((letter.getTime() - 20));
+            letter.setTime((letter.getTime() - 5));
             if (letter.getTime() == 0) {
                 delete(letter.getId());
             } else {
@@ -56,16 +55,15 @@ public class LetterServiceImplementation implements LetterServiceI {
     }
 
     @Override
-    public Letter add(String name, String content, String pin) {
+    public Letter add(String name, String pin) {
 
-        if (letterRepositoryI.checkIfNotEmpty().isEmpty()){
+        if (letterRepositoryI.checkIfNotEmpty().isEmpty()) {
             refreshQueue();
         }
 
         if (pin.equals("8888")) {
             Letter newLetter = new Letter();
             newLetter.setName(name);
-            newLetter.setContent(content);
             int lastVip = getLastVip();
             if (lastVip > 0) {
 
@@ -81,7 +79,6 @@ public class LetterServiceImplementation implements LetterServiceI {
         } else if (pin.equals("0000")) {
             Letter newLetter = new Letter();
             newLetter.setName(name);
-            newLetter.setContent(content);
             newLetter.setTime(60);
             newLetter.setStatus(getStatusEnumName("Instant").name());
             newLetter.setUniqueId(generateUniqueId());
@@ -89,7 +86,6 @@ public class LetterServiceImplementation implements LetterServiceI {
         } else {
             Letter newLetter = new Letter();
             newLetter.setName(name);
-            newLetter.setContent(content);
             newLetter.setTime(getLast() + 20);
             newLetter.setStatus(getStatusEnumName("Normal").name());
             newLetter.setUniqueId(generateUniqueId());
@@ -98,8 +94,33 @@ public class LetterServiceImplementation implements LetterServiceI {
     }
 
     @Override
+    public List<Letter> getAllInstants() {
+        return letterRepositoryI
+                .findAll(Sort.by(Sort.Direction.ASC, "time"))
+                .stream()
+                .filter(c -> c.getStatus().equals("INSTANT"))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Letter> getAllLettersBefore(String uniqueId) {
         Letter letter = getByUniqueId(uniqueId);
+        List<Letter> letterList;
+        if (letter.getStatus().equals("INSTANT")) {
+            letterList = new ArrayList<>();
+        } else {
+            letterList = getAllSorted()
+                    .stream()
+                    .filter(c -> c.getTime() < letter.getTime() && !c.getStatus().equals("INSTANT"))
+                    .collect(Collectors.toList());
+        }
+        letterList.add(letter);
+        return letterList;
+    }
+
+    @Override
+    public List<Letter> getAllLettersBeforeName(String name) {
+        Letter letter = getByName(name);
         List<Letter> letterList;
         if (letter.getStatus().equals("INSTANT")) {
             letterList = new ArrayList<>();
@@ -113,14 +134,10 @@ public class LetterServiceImplementation implements LetterServiceI {
         return letterList;
     }
 
-    public Letter getById(Long id) {
-        Optional<Letter> letterOptional = this.letterRepositoryI.findById(id);
-        return letterOptional.get();
-    }
-
     public int getLast() {
         try {
-            List<Letter> letterList = letterRepositoryI.findAll(Sort.by(Sort.Direction.DESC, "time"));
+            List<Letter> letterList = letterRepositoryI.findAll(Sort.by(Sort.Direction.DESC, "time"))
+                    .stream().filter(c -> !c.getStatus().equals("INSTANT")).collect(Collectors.toList());
             return letterList.get(0).getTime();
         } catch (Exception e) {
             return 0;
@@ -131,7 +148,8 @@ public class LetterServiceImplementation implements LetterServiceI {
 
     public int getFirst() {
         try {
-            List<Letter> letterList = letterRepositoryI.findAll(Sort.by(Sort.Direction.ASC, "time"));
+            List<Letter> letterList = letterRepositoryI.findAll(Sort.by(Sort.Direction.DESC, "time"))
+                    .stream().filter(c -> !c.getStatus().equals("INSTANT")).collect(Collectors.toList());
             return letterList.get(0).getTime();
         } catch (Exception e) {
             return 0;
@@ -141,6 +159,10 @@ public class LetterServiceImplementation implements LetterServiceI {
 
     public Letter getByUniqueId(String uniqueId) {
         return letterRepositoryI.findByUniqueId(uniqueId);
+    }
+
+    public Letter getByName(String name) {
+        return letterRepositoryI.findByName(name);
     }
 
 
@@ -179,7 +201,6 @@ public class LetterServiceImplementation implements LetterServiceI {
 
         Letter currentLetter = currentLetterOptional.get();
 
-        currentLetter.setContent(letter.getContent());
         currentLetter.setName(letter.getName());
         currentLetter.setTime(letter.getTime());
         return letterRepositoryI.save(currentLetter);

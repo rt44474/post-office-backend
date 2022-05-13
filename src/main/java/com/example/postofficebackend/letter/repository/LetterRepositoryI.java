@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface LetterRepositoryI extends JpaRepository<Letter, Long> {
     Letter findByUniqueId(String uniqueId);
+    Letter findByName(String name);
 
     @Query("select 1 from Letter")
     List<Integer> checkIfNotEmpty();

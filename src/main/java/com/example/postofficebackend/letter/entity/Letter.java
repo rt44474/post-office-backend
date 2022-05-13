@@ -21,10 +21,10 @@ public class Letter implements Serializable {
 
     private String uniqueId;
     private String name;
-    private String content;
     private String status;
 
     private int time;
+
 
 
 
