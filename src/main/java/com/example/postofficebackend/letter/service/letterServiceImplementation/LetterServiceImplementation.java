@@ -106,6 +106,9 @@ public class LetterServiceImplementation implements LetterServiceI {
     public List<Letter> getAllLettersBefore(String uniqueId) {
         Letter letter = getByUniqueId(uniqueId);
         List<Letter> letterList;
+        if (letter == null){
+            return null;
+        }
         if (letter.getStatus().equals("INSTANT")) {
             letterList = new ArrayList<>();
         } else {
