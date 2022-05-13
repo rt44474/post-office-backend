@@ -9,6 +9,12 @@ Instrukcja uruchomienia (CMD):
 3. Wklejenie komendy: cd .\post-office-backend\
 4. Wklejenie komendy: mvn spring-boot:run
 
+Instrukcja uruchomienia (JAR):
+1. Otworzenie CMD w pustym folderze
+2. Wklejenie komendy: git clone https://github.com/rt44474/post-office-backend.git
+3. Wklejenie komendy: cd .\post-office-backend\out\artifacts\post_office_backend_jar\
+4. Wklejenie komendy: java -jar .\post-office-backend-0.0.1-SNAPSHOT.jar
+
 (Intellij)
 1. Otworzenie CMD w pustym folderze
 2. Wklejenie komendy: git clone https://github.com/rt44474/post-office-backend.git
