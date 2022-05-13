@@ -40,8 +40,6 @@ public class LetterServiceImplementation implements LetterServiceI {
 
     @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
     public void refreshQueue() {
-        //System.out.println("aktualnie: "+date.getTime());
-
         List<Letter> letterList = getAll();
 
         for (Letter letter : letterList) {
@@ -57,7 +55,7 @@ public class LetterServiceImplementation implements LetterServiceI {
     @Override
     public Letter add(String name, String pin) {
 
-        switch (checkIfNameExists(name)){
+        switch (checkIfNameExists(name)) {
             case 0:
                 return null;
             case 1:
@@ -108,7 +106,7 @@ public class LetterServiceImplementation implements LetterServiceI {
     @Override
     public List<Letter> getAllLettersBefore(String uniqueId) {
         Letter letter = getByUniqueId(uniqueId);
-        if (letter == null){
+        if (letter == null) {
             return null;
         }
         List<Letter> letterList;
@@ -127,7 +125,7 @@ public class LetterServiceImplementation implements LetterServiceI {
     @Override
     public List<Letter> getAllLettersBeforeName(String name) {
         Letter letter = getByName(name);
-        if (letter == null){
+        if (letter == null) {
             return null;
         }
         List<Letter> letterList;
@@ -143,11 +141,11 @@ public class LetterServiceImplementation implements LetterServiceI {
         return letterList;
     }
 
-    public int checkIfNameExists(String name){
+    public int checkIfNameExists(String name) {
         Letter letter = letterRepositoryI.findByName(name);
-        if (letter != null){
+        if (letter != null) {
             return 0;
-        }else {
+        } else {
             return 1;
         }
 
@@ -167,7 +165,7 @@ public class LetterServiceImplementation implements LetterServiceI {
 
     public int getFirst() {
         try {
-            List<Letter> letterList = letterRepositoryI.findAll(Sort.by(Sort.Direction.DESC, "time"))
+            List<Letter> letterList = letterRepositoryI.findAll(Sort.by(Sort.Direction.ASC, "time"))
                     .stream().filter(c -> !c.getStatus().equals("INSTANT")).collect(Collectors.toList());
             return letterList.get(0).getTime();
         } catch (Exception e) {
@@ -177,18 +175,16 @@ public class LetterServiceImplementation implements LetterServiceI {
     }
 
     public Letter getByUniqueId(String uniqueId) {
-        Letter letter = letterRepositoryI.findByUniqueId(uniqueId);
-        return letter;
+        return letterRepositoryI.findByUniqueId(uniqueId);
     }
 
     public Letter getByName(String name) {
-        Letter letter = letterRepositoryI.findByName(name);
-        return letter;
+        return letterRepositoryI.findByName(name);
     }
 
 
     public void addTimeToAll() {
-        List<Letter> letterList = getAll();
+        List<Letter> letterList = getAllSorted();
         try {
             if (letterList.get(0).getStatus().equals("NORMAL")) {
                 letterList.remove(0);
@@ -199,7 +195,6 @@ public class LetterServiceImplementation implements LetterServiceI {
 
         for (Letter letter : letterList) {
             if (letter.getStatus().equals("INSTANT") || letter.getStatus().equals("VIP")) {
-                continue;
             } else {
                 letter.setTime(letter.getTime() + 20);
                 update(letter);
@@ -217,14 +212,14 @@ public class LetterServiceImplementation implements LetterServiceI {
         }
     }
 
-    public Letter update(Letter letter) {
+    public void update(Letter letter) {
         Optional<Letter> currentLetterOptional = this.letterRepositoryI.findById(letter.getId());
 
         Letter currentLetter = currentLetterOptional.get();
 
         currentLetter.setName(letter.getName());
         currentLetter.setTime(letter.getTime());
-        return letterRepositoryI.save(currentLetter);
+        letterRepositoryI.save(currentLetter);
     }
 
     public void delete(Long id) {
